@@ -37,3 +37,6 @@ logs/
 
 /docker-compose.yml
 chibisafe.moe.conf
+
+
+nginx/ssl/*
