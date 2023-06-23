@@ -156,9 +156,9 @@ export const getFiles = async (page: number) => {
 	}
 };
 
-export const getFilesAdmin = async (page: number) => {
+export const getFilesAdmin = async (page: number, publicOnly = false) => {
 	try {
-		const data = await request.get(`admin/files?page=${page}`);
+		const data = await request.get(`admin/files?page=${page}&publicOnly=${publicOnly}`);
 		debug('getFilesAdmin', data);
 		return { files: data.files, count: data.count };
 	} catch (error: any) {
@@ -171,6 +171,18 @@ export const getFilesFromUser = async (uuid: string, page: number) => {
 		const data = await request.get(`admin/user/${uuid}/files?page=${page}`);
 		debug('getFilesFromUser', data);
 		return { user: data.user, files: data.files, count: data.count };
+	} catch (error: any) {
+		sendErrorToast(error.message);
+	}
+};
+
+export const getFilesFromIP = async (ip: string, page: number) => {
+	try {
+		const data = await request.post(`admin/ip/files?page=${page}`, {
+			ip
+		});
+		debug('getFilesFromIP', data);
+		return { files: data.files, count: data.count, banned: data.banned };
 	} catch (error: any) {
 		sendErrorToast(error.message);
 	}
@@ -199,6 +211,26 @@ export const deleteFileAsAdmin = async (uuid: string) => {
 	try {
 		const data = await request.delete(`admin/file/${uuid}`);
 		debug('deleteFileAsAdmin', data);
+	} catch (error: any) {
+		sendErrorToast(error.message);
+	}
+};
+
+export const banIP = async (ip: string) => {
+	try {
+		const data = await request.post(`admin/ip/ban`, { ip });
+		debug('banIP', data);
+		if (data.message) sendSuccessToast(data.message);
+	} catch (error: any) {
+		sendErrorToast(error.message);
+	}
+};
+
+export const unbanIP = async (ip: string) => {
+	try {
+		const data = await request.post(`admin/ip/unban`, { ip });
+		debug('unbanIP', data);
+		if (data.message) sendSuccessToast(data.message);
 	} catch (error: any) {
 		sendErrorToast(error.message);
 	}
@@ -323,6 +355,26 @@ export const purgeUser = async (uuid: string) => {
 	}
 };
 
+export const purgeAnonymousFiles = async () => {
+	try {
+		const data = await request.post(`admin/files/purge/public`);
+		debug('purgeAnonymousFiles', data);
+		if (data.message) sendSuccessToast(data.message);
+	} catch (error: any) {
+		sendErrorToast(error.message);
+	}
+};
+
+export const purgeFilesFromIP = async (ip: string) => {
+	try {
+		const data = await request.post(`admin/ip/files/purge`, { ip });
+		debug('purgeFilesFromIP', data);
+		if (data.message) sendSuccessToast(data.message);
+	} catch (error: any) {
+		sendErrorToast(error.message);
+	}
+};
+
 export const disableUser = async (uuid: string) => {
 	try {
 		const data = await request.post(`admin/user/${uuid}/disable`);
@@ -433,6 +485,16 @@ export const getTags = async () => {
 	try {
 		const data = await request.get(`tags`);
 		debug('getTags', data);
+		return data;
+	} catch (error: any) {
+		sendErrorToast(error.message);
+	}
+};
+
+export const searchFiles = async (text: string, page: number) => {
+	try {
+		const data = await request.post(`files/search?page=${page}`, { text });
+		debug('searchFiles', data);
 		return data;
 	} catch (error: any) {
 		sendErrorToast(error.message);

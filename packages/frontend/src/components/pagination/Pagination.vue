@@ -1,6 +1,11 @@
 <template>
-	<div class="flex items-center">
-		<span class="text-dark-80 dark:text-light-100 mr-4">Page {{ page }} of {{ Math.ceil(total / 50) }}</span>
+	<div class="flex items-center mobile:justify-center">
+		<span class="text-dark-80 dark:text-light-100 mr-4 mobile:hidden"
+			>Page {{ page }} of {{ Math.ceil(total / 50) }}</span
+		>
+		<span class="text-dark-80 dark:text-light-100 mr-4 desktop:hidden"
+			>{{ page }} / {{ Math.ceil(total / 50) }}</span
+		>
 		<button
 			:disabled="isFirstPage"
 			type="button"
@@ -26,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFilesStore } from '~/store/files';
 import { useAlbumsStore } from '~/store/albums';
@@ -37,7 +42,6 @@ const props = defineProps<{
 
 const route = useRoute();
 const router = useRouter();
-const queryPage = ref(route.query.page);
 
 const filesStore = useFilesStore();
 const albumsStore = useAlbumsStore();
@@ -72,7 +76,12 @@ const previousPage = async () => {
 	else await filesStore.getPreviousPage();
 
 	const query = { ...route.query };
-	if (page.value === 1) delete query.page;
+	if (page.value === 1) {
+		delete query.page;
+	} else {
+		query.page = String(page.value);
+	}
+
 	await router.replace({ query });
 };
 
@@ -80,7 +89,9 @@ const nextPage = async () => {
 	if (props.type === 'album') await albumsStore.getNextPage();
 	else await filesStore.getNextPage();
 
-	await router.replace({ query: { page: page.value } });
+	const query = { ...route.query };
+	query.page = String(page.value);
+	await router.replace({ query });
 };
 
 const goToPage = async (event: Event) => {
